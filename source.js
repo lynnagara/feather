@@ -4,34 +4,48 @@ var store = {
 
 }
 
-var Component = function (state, template) {
-	this.state = state;
+var Component = function (template) {
 	this.template = template;
 }
 
-Component.prototype.render = function () {
+Component.prototype.render = function (state) {
   self = this;
   pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
-  function replace(match, variable){
-  	if (variable[0] === '*') {
-  		return window[variable.slice(1)].render();
-  	} else {
-	    return ''+self.state[variable];
-  	}
+  function replaceVariables(match, variable){
+	    return ''+state[variable];
+  }
+
+  variable = this.template.replace(pattern, replaceVariables);	
+
+  function replaceTags(whole, name, propsString) {
+
+		// s = 'key1="stuff" key2="morestuff"'
+
+		pattern = /(\w+)="(.*?)"/g
+		props = {}
+
+		while (m = pattern.exec(propsString)) {
+		  props[m[1]] = m[2];
+		}
+
+  	return window[name].render(props);
 
   }
-  return this.template.replace(pattern, replace);	
+
+	return variable.replace(/<(\w+) ([^><]+?)\/>/g, replaceTags);
+
 }
 
 var listcomponent = new Component(
-	{ name: '' },
-	'<div class="listcomponent">{{*component1}}</div>'
+	'<div class="listcomponent">\
+		<listitem name="Tom" location="New york" />\
+		<listitem name="Lyn" location="New york" />\
+	</div>'
 );
 
 
-var component1 = new Component(
-	{ name: 'Tom' },
-	'<div class="component1">{{name}}</div>'
+var listitem = new Component(
+	'<div class="component1">{{name}} - {{location}}</div>'
 );
 
 
@@ -39,7 +53,7 @@ function renderComponent(component) {
 	var view = document.getElementById('view');
 	view.innerHTML = '';
 	var element = document.createElement('div');
-	element.innerHTML = component.render();
+	element.innerHTML = component.render({name: 'Tom'});
 	view.appendChild(element);
 }
 
