@@ -4,22 +4,25 @@ var store = {
 
 }
 
-
-
-var component1 = {
-	state: {
-		name: 'Tom'
-	},
-	template: '<div>{{name}}</div>',
-	render: function () {
-    self = this;
-    pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
-    function replace(match, variable){
-      return ''+self.state[variable];
-    }
-    return this.template.replace(pattern, replace);
-	}
+var Component = function (state, template) {
+	this.state = state;
+	this.template = template;
 }
+
+Component.prototype.render = function () {
+  self = this;
+  pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
+  function replace(match, variable){
+    return ''+self.state[variable];
+  }
+  return this.template.replace(pattern, replace);	
+}
+
+
+var component1 = new Component(
+	{ name: 'Tom' },
+	'<div>{{name}}</div>'
+);
 
 
 function renderComponent(component) {
