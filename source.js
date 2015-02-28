@@ -10,7 +10,10 @@ var component1 = {
 	state: {
 		name: 'Tom'
 	},
-	template: '<div>{{state.name}}</div>'
+	template: '<div>{{name}}</div>',
+	render: function () {
+
+	}
 }
 
 
