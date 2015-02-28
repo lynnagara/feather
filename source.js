@@ -12,7 +12,12 @@ var component1 = {
 	},
 	template: '<div>{{name}}</div>',
 	render: function () {
-
+    self = this;
+    pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
+    function replace(match, variable){
+      return ''+self.state[variable];
+    }
+    return this.template.replace(pattern, replace);
 	}
 }
 
@@ -21,7 +26,7 @@ function renderComponent(component) {
 	var view = document.getElementById('view');
 	view.innerHTML = '';
 	var element = document.createElement('div');
-	element.innerHTML = component.template;
+	element.innerHTML = component.render();
 	view.appendChild(element);
 }
 
