@@ -13,15 +13,25 @@ Component.prototype.render = function () {
   self = this;
   pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
   function replace(match, variable){
-    return ''+self.state[variable];
+  	if (variable[0] === '*') {
+  		return window[variable.slice(1)].render();
+  	} else {
+	    return ''+self.state[variable];
+  	}
+
   }
   return this.template.replace(pattern, replace);	
 }
 
+var listcomponent = new Component(
+	{ name: '' },
+	'<div class="listcomponent">{{*component1}}</div>'
+);
+
 
 var component1 = new Component(
 	{ name: 'Tom' },
-	'<div>{{name}}</div>'
+	'<div class="component1">{{name}}</div>'
 );
 
 
@@ -33,7 +43,7 @@ function renderComponent(component) {
 	view.appendChild(element);
 }
 
-renderComponent(component1);
+renderComponent(listcomponent);
 
 
 // function render(list_of_stuff){
