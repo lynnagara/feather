@@ -2,13 +2,24 @@
 
 var Feather = function() {};
 
-Feather.Component = function (component) {
+Feather.App = function () {};
+
+Feather.App.Component = function (component) {
+    this.app = component.app;
 	this.template = component.template;
 }
 
-Feather.Component.prototype.render = function (state) {
-    var self = this;
-    var pattern = /\{\{(.*?)\}\}/g  // nongreedy mustaches
+// Renders the outermost component
+Feather.App.Component.prototype.renderComponent = function() {
+    var view = document.body;
+    view.innerHTML = '';
+    var element = document.createElement('div');
+    element.innerHTML = this._render();
+    view.appendChild(element);
+}
+
+Feather.App.Component.prototype._render = function (state) {
+    var pattern = /\{\{(.*?)\}\}/g; // nongreedy mustaches
 
     function replaceVariables(match, variable){
         return ''+state[variable];
@@ -17,28 +28,17 @@ Feather.Component.prototype.render = function (state) {
     var variable = this.template.replace(pattern, replaceVariables);	
 
     function replaceTags(whole, name, propsString) {
-        var pattern = /(\w+)="(.*?)"/g
-        var props = {}
+        var pattern = /(\w+)="(.*?)"/g;
+        var props = {};
         var m;
         while (m = pattern.exec(propsString)) {
             props[m[1]] = m[2];
         }
-        return window[name].render(props);
+        return this.app[name]._render(props);
     }
-
-	return variable.replace(/<(\w+) ([^><]+?)\/>/g, replaceTags);
+    return variable.replace(/<(\w+) ([^><]+?)\/>/g, replaceTags.bind(this));
 
 }
-
-Feather.Component.prototype.renderComponent = function() {
-    var view = document.body;
-    view.innerHTML = '';
-    var element = document.createElement('div');
-    element.innerHTML = this.render();
-    view.appendChild(element);
-}
-
-
 
 
 
