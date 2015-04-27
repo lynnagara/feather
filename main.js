@@ -3,7 +3,7 @@
 +(function() {
 
     // Create the base app and register all the components
-    var app = new Feather.App();
+    var app = new Feather.App(); // app.Component
     // Create and render the components
 
     app.listcomponent = new Feather.App.Component({
@@ -17,7 +17,11 @@
             this.props.mylist = listitems.map(function(item) {
                 return '<div>' + item + '</div>';
             }).join('');
-            var test = '<p>Test</p>';
+            this.props.mylist2 = '<p>My custom list</p>';
+
+            // Add an identifier to the dom node
+            // e.g. react 
+
             return (
                 '<div class="listcomponent">\
                     <listitem name="{{test}}" location="New york" year="1972" />\
@@ -44,6 +48,6 @@
         }
     });
 
-    app.listcomponent.render();
+    app.listcomponent.render(); // or app.render()
     
 })();

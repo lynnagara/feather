@@ -22,14 +22,17 @@
         var pattern = /\{\{(.*?)\}\}/g;
         var whitespace_pattern = />(\s+?)</g;
         var self = this;
-        return this.template().replace(pattern, function(whole, name) {
+
+        function replaceTags(whole, name) {
             if (self.props[name]) {
                 return self.props[name];
             } else {
                 return whole;
             }
-        })
-        // Now strip out the whitespace
+        }
+
+        // Replace the tags and strip the whitespace
+        return this.template().replace(pattern, replaceTags)
         .replace(whitespace_pattern, '><');
     }
 
