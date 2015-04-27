@@ -13,26 +13,34 @@
             // Populate the component list
             this.props.test = "Tom";
         },
-        template: (
-            '<div class="listcomponent">\
-                <listitem name="{{test}}" location="New york" year="1972" />\
-                <listitem name="Lyn" location="New york" />\
-                <listitem name="Cat" location="New york" />\
-                <summary />\
-            </div>'
-        )
+        template: function () {
+            var list = [];
+
+            return (
+                '<div class="listcomponent">\
+                    <listitem name="{{test}}" location="New york" year="1972" />\
+                    <listitem name="Lyn" location="New york" />\
+                    <listitem name="Cat" location="New york" />\
+                    <summary />\
+                </div>'
+            )
+        }
     });
 
     app.listitem = new Feather.App.Component({
         app: app,
-        template: ('<div class="component1">{{name}} - {{location}} - {{year}}</div>')
+        template: function() {
+            return ('<div class="component1">{{name}} - {{location}} - {{year}}</div>')
+        }   
     });
 
     app.summary = new Feather.App.Component({
         app: app,
-        template: ('<div>I am the summary</div>')
+        template: function() {
+            return ('<div>I am the summary component</div>')
+        }
     });
 
-    app.listcomponent.renderComponent();
+    app.listcomponent.render();
 
 })();
