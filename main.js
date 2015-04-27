@@ -10,7 +10,7 @@
         app: app,
         init: function() {
             // Populate the component list
-            this.props.test = "Tom";
+            this.props.test = 'Tom';
         },
         template: function() {
             var listitems = ['item 1','item 2', 'item 3'];
@@ -23,7 +23,7 @@
                     <listitem name="Lyn" location="New york" />\
                     <listitem name="Cat" location="New york" />\
                     <summary />\
-                    {{=mylist}}\
+                    {{mylist}}\
                 </div>'
             )
         }
