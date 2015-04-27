@@ -1,0 +1,11 @@
+{
+  "name": "feather",
+  "version": "1.0.0",
+  "description": "super lightweight templating for javascript apps",
+  "main": "feather.js",
+  "devDependencies": {
+    "chai": "^2.1.1",
+    "mocha": "^2.2.4",
+    "sinon": "^1.13.0"
+  }
+}

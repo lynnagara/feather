@@ -4,7 +4,6 @@
 
     // Create the base app and register all the components
     var app = new Feather.App();
-
     // Create and render the components
 
     app.listcomponent = new Feather.App.Component({
@@ -45,5 +44,5 @@
     });
 
     app.listcomponent.render();
-
+    
 })();
