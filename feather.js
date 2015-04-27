@@ -6,15 +6,17 @@ Feather.App = function () {};
 
 Feather.App.Component = function (component) {
     this.app = component.app;
-	this.template = component.template();
-    this.init = component.init;
+	// this.template = component.template();
     this.props = {};
+    this.template = component.template;
+    this._template = this._compile();
+    this.init = component.init;
     // Run init() code
     if (this.init) { this.init(); }
     // Replace template variables
     var pattern = /\{\{(.*?)\}\}/g;
     var self = this;
-    this._template = this.template.replace(pattern, function(whole, name) {
+    this._template = this._template.replace(pattern, function(whole, name) {
         if (self.props[name]) {
             return self.props[name];
         } else {
@@ -22,6 +24,18 @@ Feather.App.Component = function (component) {
         }
     });
 }
+
+Feather.App.Component.prototype._compile = function() {
+    // Replace any variables defined in the template() method
+    var pattern = /\{\{\=(.*?)\}\}/g;  // e.g. {{=var}}
+    var self = this;
+    var compiled = this.template().replace(pattern, function(whole, name) {
+        return self.props[name];
+    });
+    return compiled;
+
+}
+
 
 // Renders the base component
 Feather.App.Component.prototype.render = function() {

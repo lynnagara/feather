@@ -13,15 +13,18 @@
             // Populate the component list
             this.props.test = "Tom";
         },
-        template: function () {
-            var list = [];
-
+        template: function() {
+            var listitems = ['item 1','item 2', 'item 3'];
+            this.props.mylist = listitems.map(function(item) {
+                return '<div>' + item + '</div>';
+            }).join('');
             return (
                 '<div class="listcomponent">\
                     <listitem name="{{test}}" location="New york" year="1972" />\
                     <listitem name="Lyn" location="New york" />\
                     <listitem name="Cat" location="New york" />\
                     <summary />\
+                    {{=mylist}}\
                 </div>'
             )
         }
