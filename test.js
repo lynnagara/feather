@@ -17,10 +17,20 @@ describe('Component', function() {
                 },
                 template: function() {
                     this.props.testvar = 'super';
-                    return '<div>My {{testvar}} awesome component</div>'
+                    return (
+                        '<div>       <div>My {{testvar}} awesome component</div>      </div>'
+                    )
                 }
             });
+
+            myapp.mynestedcomponent = new Feather.App.Component({
+                template: function() {
+                    return ('<p>Inner component</p>');
+                }
+            });
+
             myapp.mycomponent.render();
+
         });
 
         it('should create the component', function(done) {
@@ -29,10 +39,16 @@ describe('Component', function() {
             done();
         });
 
-        it('should compile the component', function(done) {
-            assert.equal(myapp.mycomponent._template, '<div>My super awesome component</div>');
+        it('should compile the component and strip whitespace', function(done) {
+            assert.equal(
+                myapp.mycomponent._template, 
+                '<div><div>My super awesome component</div></div>'
+            );
             done();
         });
 
+        it('should render nested component', function(done) {
+            done();
+        });
     });
 });

@@ -17,6 +17,7 @@
             this.props.mylist = listitems.map(function(item) {
                 return '<div>' + item + '</div>';
             }).join('');
+            var test = '<p>Test</p>';
             return (
                 '<div class="listcomponent">\
                     <listitem name="{{test}}" location="New york" year="1972" />\

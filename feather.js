@@ -20,14 +20,17 @@
     // Replaces all props variables
     Feather.App.Component.prototype._compile = function() {
         var pattern = /\{\{(.*?)\}\}/g;
+        var whitespace_pattern = />(\s+?)</g;
         var self = this;
-        return this._template = this.template().replace(pattern, function(whole, name) {
+        return this.template().replace(pattern, function(whole, name) {
             if (self.props[name]) {
                 return self.props[name];
             } else {
                 return whole;
             }
-        });
+        })
+        // Now strip out the whitespace
+        .replace(whitespace_pattern, '><');
     }
 
     // Render the base component if we are in a browser
