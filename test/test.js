@@ -120,5 +120,9 @@ describe('Component', function() {
             done();
         });
     });
+
+    describe('Iterators!', function() {
+
+    });
 });
 

@@ -23,8 +23,8 @@
             this.props.test = 'Tom';
         },
         template: function() {
-            var listitems = ['item 1','item 2', 'item 3'];
-            this.props.mylist = listitems.map(function(item) {
+            this.props.listitems = ['item 1','item 2', 'item 3'];
+            this.props.mylist = this.props.listitems.map(function(item) {
                 return '<div>' + item + '</div>';
             }).join('');
             this.props.mylist2 = '<p>My custom list</p>';
@@ -39,6 +39,9 @@
                     <listitem name="Cat" location="New york" />\
                     <summary />\
                     {{mylist}}\
+                    {{#each x in listitems}}\
+                        <div>Test {{x}}</div>\
+                    {{/each}}\
                 </div>'
             )
         }

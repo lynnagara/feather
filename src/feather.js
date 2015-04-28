@@ -43,11 +43,23 @@
 
     // Replaces all props variables
     Feather.App.Component.prototype._compile = function () {
-        var pattern = /\{\{(.*?)\}\}/g;
+        var tag_pattern = /\{\{(.*?)\}\}/g;
         var whitespace_pattern = />(\s+?)</g;
+        var each_pattern = /\{\{\#each\s(.+?) in (.+?)\}\}(.*?)\{\{\/each\}\}/g;
         var self = this;
 
-        function replaceTags(whole, name) {
+        function replaceEachTags(whole, m1, m2, m3) {
+            var iterator_pattern = /\{\{(.*?)\}\}/g;
+            return self.props[m2]
+                .map(function(i) {
+                    return m3.replace(iterator_pattern, function(whole, match) {
+                        return i;
+                    });
+                })
+                .join('');
+        }
+
+        function replacePropTags(whole, name) {
             if (self.props[name]) {
                 return self.props[name];
             } else {
@@ -56,7 +68,9 @@
         }
 
         // Replace the tags and strip the whitespace
-        return this.template().replace(pattern, replaceTags)
+        return this.template()
+        .replace(each_pattern, replaceEachTags)
+        .replace(tag_pattern, replacePropTags)
         .replace(whitespace_pattern, '><');
     }
 
@@ -72,7 +86,7 @@
     }
 
     Feather.App.Component.prototype._renderComponent = function (state) {
-        var pattern = /\{\{(.*?)\}\}/g; // nongreedy mustaches
+        var pattern = /\{\{(.*?)\}\}/g;
 
         function replaceVariables(match, variable){
             // Prints an empty string if undefined
