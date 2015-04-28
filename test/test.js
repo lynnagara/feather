@@ -1,7 +1,7 @@
 'use strict';
 
 // var assert = require('assert');
-var Feather = require('./feather.js').Feather;
+var Feather = require('../src/feather.js').Feather;
 var assert = require('chai').assert;
 
 describe('Component', function() {
