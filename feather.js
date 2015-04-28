@@ -1,13 +1,37 @@
 'use strict';
 
-+(function(scope){
++(function (scope){
 
-    var Feather = function() {};
+    var Feather = function () {};
 
-    Feather.App = function () {};
+    Feather.App = function () {
+        this.components = {};
+        this.baseComponents = [];
+    }
+
+    Feather.App.prototype.createComponent = function (component) {
+        if (component.el) {
+            this.baseComponents.push(component.name);
+        }
+        this.components[component.name] = new Feather.App.Component({
+            app: this,
+            name: component.name,
+            el: component.el,
+            init: component.init,
+            template: component.template
+        });
+    }
+
+    // Calls render() on the base component/s of the app
+    Feather.App.prototype.render = function () {
+        this.baseComponents.forEach(function(component) {
+            this.components[component].render();
+        }, this);
+    }
 
     Feather.App.Component = function (component) {
         this.app = component.app;
+        this.el = component.el;
         this.props = {};
         this.template = component.template;
         this.init = component.init;
@@ -18,7 +42,7 @@
     }
 
     // Replaces all props variables
-    Feather.App.Component.prototype._compile = function() {
+    Feather.App.Component.prototype._compile = function () {
         var pattern = /\{\{(.*?)\}\}/g;
         var whitespace_pattern = />(\s+?)</g;
         var self = this;
@@ -36,16 +60,14 @@
         .replace(whitespace_pattern, '><');
     }
 
-    // Render the base component if we are in a browser
-    Feather.App.Component.prototype.render = function() {
+    // Only do render() if we are in a browser
+    Feather.App.Component.prototype.render = function () {
         if (typeof window !== 'undefined') {
-            var view = document.body;
+            var view = this.el;
             view.innerHTML = '';
             var element = document.createElement('div');
             element.innerHTML = this._renderComponent();
             view.appendChild(element);
-        } else {
-            var element = this._renderComponent();
         }
     }
 
@@ -65,7 +87,7 @@
             while (m = pattern.exec(propsString)) {
                 props[m[1]] = m[2];
             }
-            return this.app[name]._renderComponent(props);
+            return this.app.components[name]._renderComponent(props);
         }
         return variable.replace(/<(\w+)([^><]+?)\/>/g, replaceTags.bind(this));
     }

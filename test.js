@@ -13,7 +13,9 @@ describe('Component', function() {
 
         beforeEach(function() {
             myapp = new Feather.App();
-            myapp.mycomponent = new Feather.App.Component({
+
+            myapp.createComponent({
+                name: 'mycomponent',
                 init: function() {
                     return 'init!';
                 },
@@ -23,26 +25,27 @@ describe('Component', function() {
                         '<div>       <div>My {{testvar}} awesome component</div>      </div>'
                     )
                 }
+
             });
 
-            myapp.mycomponent.render();
+            myapp.components.mycomponent.render();
 
         });
 
         it('should create the component', function(done) {
-            assert.equal(myapp.mycomponent.app, Feather.App());
-            assert.isObject(myapp.mycomponent.props);
+            assert.equal(myapp.app, Feather.App());
+            assert.isObject(myapp.components.mycomponent.props);
             done();
         });
 
         it('should run init()', function(done) {
-            assert.equal(myapp.mycomponent.init(), 'init!');
+            assert.equal(myapp.components.mycomponent.init(), 'init!');
             done();
         });
 
         it('should compile the component and strip whitespace', function(done) {
             assert.equal(
-                myapp.mycomponent._template, 
+                myapp.components.mycomponent._template, 
                 '<div><div>My super awesome component</div></div>'
             );
             done();
@@ -55,8 +58,9 @@ describe('Component', function() {
 
         beforeEach(function() {
             myapp = new Feather.App();
-            myapp.mycomponent = new Feather.App.Component({
-                app: myapp,
+
+            myapp.createComponent({
+                name: 'mycomponent',
                 template: function() {
                     this.props.testvar = 'YOLO';
                     return (
@@ -70,17 +74,20 @@ describe('Component', function() {
                 }
             });
 
-            myapp.mynestedcomponent = new Feather.App.Component({
-                app: myapp,
+            myapp.createComponent({
+                name: 'mynestedcomponent',
                 template: function() {
-                    return ('<p>Inner component</p>');
+                     return ('<p>Inner component</p>');
                 }
             });
+
+            myapp.components.mycomponent.render();
+
         });
 
         it('should render nested component', function(done) {
             assert.equal(
-                myapp.mycomponent._renderComponent(),
+                myapp.components.mycomponent._renderComponent(),
                 '<div><div>My YOLO awesome component</div><p>Inner component</p><p>Inner component</p><p>Inner component</p></div>'
             );
             done();
