@@ -68,7 +68,6 @@ describe('Component', function() {
                             <div>My {{testvar}} awesome component</div>\
                             <mynestedcomponent />\
                             <mynestedcomponent />\
-                            <mynestedcomponent />\
                         </div>'
                     )
                 }
@@ -81,16 +80,45 @@ describe('Component', function() {
                 }
             });
 
-            myapp.components.mycomponent.render();
-
+            myapp.createComponent({
+                el: {}, // Hack for testing
+                name: 'rootcomponent',
+                template: function() {
+                     return (
+                        '<div>\
+                            <p>This is my main component:</p>\
+                            <mycomponent />\
+                        </div>'
+                    );
+                }
+            });
         });
 
         it('should render nested component', function(done) {
+            // Render mycomponent
+            myapp.components.mycomponent.render();
+
             assert.equal(
                 myapp.components.mycomponent._renderComponent(),
-                '<div><div>My YOLO awesome component</div><p>Inner component</p><p>Inner component</p><p>Inner component</p></div>'
+                '<div><div>My YOLO awesome component</div><p>Inner component</p><p>Inner component</p></div>'
             );
+            done();
+        });
+        it ('should render a twice nested component', function(done) {
+            // Render rootcomponent
+            myapp.components.rootcomponent.render();
+
+            assert.equal(
+                myapp.components.rootcomponent._renderComponent(),
+                '<div><p>This is my main component:</p><div><div>My YOLO awesome component</div><p>Inner component</p><p>Inner component</p></div></div>'
+            );
+            done();
+        });
+        it ('should also work on app.render()', function(done) {
+            assert.include(myapp.baseComponents, 'rootcomponent');
+            assert.equal(myapp.baseComponents.length, 1);
             done();
         });
     });
 });
+
