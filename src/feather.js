@@ -52,9 +52,32 @@
             var iterator_pattern = /\{\{(.*?)\}\}/g;
             return self.props[m2]
                 .map(function(i) {
-                    return m3.replace(iterator_pattern, function(whole, match) {
-                        return i;
-                    });
+                    return m3.replace(iterator_pattern, function(whole2, match) {
+                        // Matches the object recursively
+                        var a, b, b1;
+                        function matchObject (obj, item) {
+                            a = obj.split('.',1)[0];
+                            b = obj.split(/\.(.*)/)[1];
+                            if (!b) {
+                                return (typeof item === 'object') ? JSON.stringify(item) : item;
+                            } else {
+                                b1 = b.split('.',1)[0];
+                                if (item[b1]) {
+                                    return matchObject(b, item[b1]);
+                                } else {
+                                    return whole;
+                                }
+                            }
+                        }
+
+                        if (m1 === match.split('.')[0]) {
+                            // Start matching recursively
+                            return matchObject(match, i);
+                        } else {
+                            return whole2;
+                        }
+
+                    });    
                 })
                 .join('');
         }
@@ -88,7 +111,7 @@
     Feather.App.Component.prototype._renderComponent = function (state) {
         var pattern = /\{\{(.*?)\}\}/g;
 
-        function replaceVariables(match, variable){
+        function replaceVariables (match, variable) {
             // Prints an empty string if undefined
             return '' + (state[variable] || '');
         }
