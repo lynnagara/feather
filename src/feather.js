@@ -58,6 +58,7 @@
                         function matchObject (obj, item) {
                             a = obj.split('.',1)[0];
                             b = obj.split(/\.(.*)/)[1];
+                            
                             if (!b) {
                                 return (typeof item === 'object') ? JSON.stringify(item) : item;
                             } else {
@@ -65,7 +66,7 @@
                                 if (item[b1]) {
                                     return matchObject(b, item[b1]);
                                 } else {
-                                    return whole;
+                                    return '';
                                 }
                             }
                         }
