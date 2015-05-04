@@ -9,3 +9,9 @@ Super lightweight templating for JavaScript apps
 ## Run unit tests
 
 `mocha`
+
+## Linter 
+
+npm install -g eslint babel-eslint
+
+eslint src/feather.js
