@@ -2,22 +2,28 @@
 
 +(function() {
 
-    // Create the base app and register all the components
-    var app = new Feather.App();
+    var app = function() {};
 
-    // Create and render the components
-    app.createComponent({
-        name: 'testcomponent',
+    app.model = {}
+
+    // Create the base app and register all the components
+    app.view = new Feather.App();
+
+
+    app.view.createComponent({
+        name: 'test',
+        el: document.getElementById('1'),
         template: function() {
             return (
-                '<div>Test!</div>'
+                '<div>Test element</div>'
             )
         }
     });
 
-    app.createComponent({
+    // Create and render the components
+    app.view.createComponent({
         name: 'listcomponent',
-        el: document.body,
+        el: document.getElementById('2'),
         init: function() {
             // Populate the component list
             this.props.test = 'Tom';
@@ -46,20 +52,29 @@
         }
     });
 
-    app.createComponent({
+    app.view.createComponent({
         name: 'listitem',
         template: function() {
             return ('<div class="component1">{{name}} - {{location}} - {{year}}</div>')
         }
     });
 
-    app.createComponent({
+    app.view.createComponent({
         name: 'summary',
+        init: function() {
+            this.props.doThing = function() {
+                console.log('do thing');
+            }
+        },
         template: function() {
-            return ('<div>I am the summary component</div>')
+            return (
+                '<div>\
+                    <span>I am the summary component</span>\
+                </div>'
+            )
         }
     });
 
-    app.render();
+    app.view.render();
 
 })();

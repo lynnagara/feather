@@ -6,13 +6,18 @@
 
     Feather.App = function () {
         this.components = {};
-        this.baseComponents = [];
+        this.baseComponents = []; // Array of the base level component names
+
+        // Data structure to hold the information about the nodes
+        this._nodes = {};
+
     }
 
     Feather.App.prototype.createComponent = function (component) {
         if (component.el) {
             this.baseComponents.push(component.name);
         }
+
         this.components[component.name] = new Feather.App.Component({
             app: this,
             name: component.name,
@@ -35,6 +40,7 @@
         this.props = {};
         this.template = component.template;
         this.init = component.init;
+        this._childNodes = {}; // Empty for now
         // Run any init() code
         if (this.init) { this.init(); }
         // Compile the template
@@ -46,6 +52,7 @@
         var tag_pattern = /\{\{(.*?)\}\}/g;
         var whitespace_pattern = />(\s+?)</g;
         var each_pattern = /\{\{\#each\s(.+?) in (.+?)\}\}(.*?)\{\{\/each\}\}/g;
+        // var onclick_pattern = /onclick=\{\{(.*?)\}\}/g;
         var self = this;
 
         function replaceEachTags(whole, m1, m2, m3) {
@@ -91,9 +98,14 @@
             }
         }
 
+        // function replaceOnClickTags(whole, func) {
+        //     // Get the id of the node and add a click listener....
+        // }
+
         // Replace the tags and strip the whitespace
         return this.template()
         .replace(each_pattern, replaceEachTags)
+        // .replace(onclick_pattern, replaceOnClickTags.bind(this))
         .replace(tag_pattern, replacePropTags)
         .replace(whitespace_pattern, '><');
     }
@@ -109,14 +121,22 @@
         }
     }
 
-    Feather.App.Component.prototype._renderComponent = function (state) {
-        var pattern = /\{\{(.*?)\}\}/g;
+    Feather.App.Component.prototype._renderComponent = function (state, parent) {
+        function getPosInNodeList(self, parentNodeList) {
+            var key = 0;
+            while (true) {
+                if (!parentNodeList.hasOwnProperty(key)) {
+                    return key;
+                } else {
+                    key += 1;
+                }
+            }
+        }
 
         function replaceVariables (match, variable) {
             // Prints an empty string if undefined
             return '' + (state[variable] || '');
         }
-        var variable = this._template.replace(pattern, replaceVariables);	
 
         function replaceTags(whole, name, propsString) {
             var pattern = /(\w+)="(.*?)"/g;
@@ -125,9 +145,19 @@
             while (m = pattern.exec(propsString)) {
                 props[m[1]] = m[2];
             }
-            return this.app.components[name]._renderComponent(props);
+            return this.app.components[name]._renderComponent(props, this);
         }
-        return variable.replace(/<(\w+)([^><]+?)\/>/g, replaceTags.bind(this));
+
+        // Update the _nodes list
+        var parentNodeList = parent ? parent._childNodes : this.app._nodes;
+        var pos = getPosInNodeList(this, parentNodeList);
+        parentNodeList[pos] = this;
+
+        var pattern = /\{\{(.*?)\}\}/g;
+
+        return this._template
+            .replace(pattern, replaceVariables)
+            .replace(/<(\w+)([^><]+?)\/>/g, replaceTags.bind(this));
     }
 
     // Export global variable
