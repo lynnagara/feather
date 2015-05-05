@@ -19,15 +19,16 @@
   };
 
   Feather.App.Component = function (component) {
-    this.app       = component.app;
-    this.el        = component.el;
-    this.props     = {};
-    this.template  = component.template;
-    this.init      = component.init;
+    this.app         = component.app;
+    this.el          = component.el;
+    this.props       = {};
+    this.template    = component.template;
+    this.init        = component.init;
+    this._childNodes = {};
     // Run any init() code
     if (this.init) { this.init(); }
     // Compile the template
-    this._template = this._compile();
+    this._template = this._compileTemplate();
   };
 
   Feather.App.prototype.createComponent = function (component) {
@@ -45,7 +46,7 @@
   };
 
   // Replaces all props variables
-  Feather.App.Component.prototype._compile = function () {
+  Feather.App.Component.prototype._compileTemplate = function () {
     var tagPattern        = /\{\{(.*?)\}\}/g;
     var whitespacePattern = />(\s+?)</g;
     var eachPattern       = /\{\{\#each\s(.+?) in (.+?)\}\}(.*?)\{\{\/each\}\}/g;
@@ -102,21 +103,28 @@
       .replace(whitespacePattern, '><');
   };
 
-  // Only do render() if we are in a browser
+  // Appends it to the dom if we are in a browser
   Feather.App.Component.prototype.render = function () {
+    var componentAsStr, domNodeToAppend, tmpEl;
     if (typeof window !== 'undefined') {
-      var view = this.el;
-      var element = document.createElement('div');
-
-      view.innerHTML = '';
-      element.innerHTML = this._renderComponent();
-      view.appendChild(element);
+      // Append only the children of the newly generated node
+      domNodeToAppend = this.el;
+      componentAsStr = this._generateComponent();
+      tmpEl = document.createElement('div');
+      tmpEl.innerHTML = componentAsStr;
+      while(tmpEl.firstChild) {
+        domNodeToAppend.appendChild(tmpEl.firstChild);
+      }
     }
   };
 
-  Feather.App.Component.prototype._renderComponent = function (state, parent) {
+  // Returns a html component
+  Feather.App.Component.prototype._generateComponent = function (state, parent) {
 
     var variablePattern  = /\{\{(.*?)\}\}/g;
+    var tagPattern = /<(\w+)([^><]+?)\/>/g;
+    var dataAttrPattern = /(<div\s|.*?)>/; // Grab the start of the div tag => should prob support other tags
+
     var replaceVariables = function (match, variable) {
       // Prints an empty string if undefined
       return '' + (state[variable] || '');
@@ -130,7 +138,7 @@
         props[m[1]] = m[2];
         m = pattern.exec(propsString);
       }
-      return this.app.components[name]._renderComponent(props);
+      return this.app.components[name]._generateComponent(props, this);
     };
 
     var getPosInNodeList = function(self, parentNodeList) {
@@ -145,14 +153,19 @@
     };
 
     // Update the _nodes list
-    var parentNodeList = parent ? parent._childNodes : this.app._nodes;
+    var parentNodeList = this.el ? this.app._nodes : parent._childNodes;
     var pos = getPosInNodeList(this, parentNodeList);
     parentNodeList[pos] = this;
 
+    var addDataAttrs = function(whole, startTag) {
+      return startTag + ' data-featherid=' + pos + '>';
+    }
 
     return this._template
       .replace(variablePattern, replaceVariables)
-      .replace(/<(\w+)([^><]+?)\/>/g, replaceTags.bind(this));
+      .replace(tagPattern, replaceTags.bind(this))
+      .replace(dataAttrPattern, addDataAttrs);
+
   };
 
   // Export global variable

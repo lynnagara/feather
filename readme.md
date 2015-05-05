@@ -14,4 +14,4 @@ Super lightweight templating for JavaScript apps
 
 npm install -g eslint babel-eslint
 
-eslint src/feather.js
+`eslint src/feather.js`
