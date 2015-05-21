@@ -81,8 +81,6 @@
             } else {
               return whole2;
             }
-
-
           });
         })
         .join('');
@@ -105,67 +103,81 @@
 
   // Appends it to the dom if we are in a browser
   Feather.App.Component.prototype.render = function () {
-    var componentAsStr, domNodeToAppend, tmpEl;
+    var componentAsStr, domNodeToAppend, tmpEl, node;
     if (typeof window !== 'undefined') {
-      // Append only the children of the newly generated node
+      // Append only the first child of the newly generated node
+      // Add data attribute to the node
       domNodeToAppend = this.el;
+      node = this._getPosInNodeList(this.app._nodes);
+      this._id = node;
       componentAsStr = this._generateComponent();
       tmpEl = document.createElement('div');
       tmpEl.innerHTML = componentAsStr;
-      while(tmpEl.firstChild) {
-        domNodeToAppend.appendChild(tmpEl.firstChild);
+      tmpEl.firstChild.setAttribute('data-featherid', node);
+      domNodeToAppend.appendChild(tmpEl.firstChild);
+    }
+  };
+
+  Feather.App.Component.prototype._getPosInNodeList = function(parentNodeList) {
+    var key = 0;
+    while (true) {
+      if (!parentNodeList.hasOwnProperty(key)) {
+        return key;
+      } else {
+        key += 1;
       }
     }
   };
 
   // Returns a html component
   Feather.App.Component.prototype._generateComponent = function (state, parent) {
-
-    var variablePattern  = /\{\{(.*?)\}\}/g;
+    var self = this;
+    var variablePattern = /\{\{(.*?)\}\}/g;
     var tagPattern = /<(\w+)([^><]+?)\/>/g;
-    var dataAttrPattern = /(<div\s|.*?)>/; // Grab the start of the div tag => should prob support other tags
 
     var replaceVariables = function (match, variable) {
       // Prints an empty string if undefined
       return '' + (state[variable] || '');
     };
-    var replaceTags = function(whole, name, propsString) {
-      var pattern = /(\w+)="(.*?)"/g;
+
+    var replaceCustomTags = function(whole, name, propsString) {
+      var parentNodeId = this._parentNodeId;
+      var customTagPattern = /(\w+)="(.*?)"/g;
+      var dataAttrPattern = /(<div\s|.*?)>/; // Grab the start of the div tag => should prob support other tags
       var props = {};
-      var m = pattern.exec(propsString);
+      var m = customTagPattern.exec(propsString);
+
+      // Update the _nodes list
+      var parentNodeList = this.el ? this.app._nodes : parent._childNodes;
+      var pos = this._getPosInNodeList(parentNodeList).toString();
+      this._parentNode = parent ? parent : null;
+      parentNodeList[pos] = this;
+      var nodeId = '' + this._id + '.' + pos;
+      var addDataAttrs = function(whole, startTag) {
+        // console.log(this);
+        return startTag + ' data-featherid=' + nodeId + '>';
+      }
 
       while (m) {
         props[m[1]] = m[2];
-        m = pattern.exec(propsString);
+        m = customTagPattern.exec(propsString);
       }
-      return this.app.components[name]._generateComponent(props, this);
+
+      return this.app.components[name]
+        ._generateComponent(props, this)
+        .replace(dataAttrPattern, function(whole, m1) {
+          return addDataAttrs.call(self, whole, m1);                        
+        });
     };
-
-    var getPosInNodeList = function(self, parentNodeList) {
-      var key = 0;
-      while (true) {
-        if (!parentNodeList.hasOwnProperty(key)) {
-          return key;
-        } else {
-          key += 1;
-        }
-      }
-    };
-
-    // Update the _nodes list
-    var parentNodeList = this.el ? this.app._nodes : parent._childNodes;
-    var pos = getPosInNodeList(this, parentNodeList);
-    parentNodeList[pos] = this;
-
-    var addDataAttrs = function(whole, startTag) {
-      return startTag + ' data-featherid=' + pos + '>';
-    }
 
     return this._template
       .replace(variablePattern, replaceVariables)
-      .replace(tagPattern, replaceTags.bind(this))
-      .replace(dataAttrPattern, addDataAttrs);
-
+      .replace(
+        tagPattern,
+        function(whole,m1,m2) {
+          return replaceCustomTags.call(self, whole, m1, m2);
+        }
+      )
   };
 
   // Export global variable
