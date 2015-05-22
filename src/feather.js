@@ -65,22 +65,19 @@
 
               if (!b) {
                 return (typeof item === 'object') ? JSON.stringify(item) : item;
-              } else {
-                b1 = b.split('.', 1)[0];
-                if (item[b1]) {
-                  return matchObject(b, item[b1]);
-                } else {
-                  return '';
-                }
               }
+
+              b1 = b.split('.', 1)[0];
+
+              return item[b1] ? matchObject(b, item[b1]) : '';
+
             }
 
             if (m1 === match.split('.')[0]) {
               // Start matching recursively
               return matchObject(match, i);
-            } else {
-              return whole2;
             }
+            return whole2;
           });
         })
         .join('');
@@ -89,9 +86,8 @@
     var replacePropTags = function(whole, name) {
       if (self.props[name]) {
         return self.props[name];
-      } else {
-        return whole;
       }
+      return whole;
     };
 
     // Replace the tags and strip the whitespace
@@ -104,6 +100,7 @@
   // Appends it to the dom if we are in a browser
   Feather.App.Component.prototype.render = function () {
     var componentAsStr, domNodeToAppend, tmpEl, node;
+
     if (typeof window !== 'undefined') {
       // Append only the first child of the newly generated node
       // Add data attribute to the node
@@ -120,12 +117,12 @@
 
   Feather.App.Component.prototype._getPosInNodeList = function(parentNodeList) {
     var key = 0;
+
     while (true) {
       if (!parentNodeList.hasOwnProperty(key)) {
         return key;
-      } else {
-        key += 1;
       }
+      key += 1;
     }
   };
 
@@ -141,7 +138,7 @@
     };
 
     var replaceCustomTags = function(whole, name, propsString) {
-      var parentNodeId = this._parentNodeId;
+      // var parentNodeId = this._parentNodeId;
       var customTagPattern = /(\w+)="(.*?)"/g;
       var dataAttrPattern = /(<div\s|.*?)>/; // Grab the start of the div tag => should prob support other tags
       var props = {};
@@ -150,13 +147,13 @@
       // Update the _nodes list
       var parentNodeList = this.el ? this.app._nodes : parent._childNodes;
       var pos = this._getPosInNodeList(parentNodeList).toString();
+
       this._parentNode = parent ? parent : null;
       parentNodeList[pos] = this;
       var nodeId = '' + this._id + '.' + pos;
-      var addDataAttrs = function(whole, startTag) {
-        // console.log(this);
+      var addDataAttrs = function(whole1, startTag) {
         return startTag + ' data-featherid=' + nodeId + '>';
-      }
+      };
 
       while (m) {
         props[m[1]] = m[2];
@@ -165,8 +162,8 @@
 
       return this.app.components[name]
         ._generateComponent(props, this)
-        .replace(dataAttrPattern, function(whole, m1) {
-          return addDataAttrs.call(self, whole, m1);                        
+        .replace(dataAttrPattern, function(whole1, m1) {
+          return addDataAttrs.call(self, whole1, m1);
         });
     };
 
@@ -174,10 +171,10 @@
       .replace(variablePattern, replaceVariables)
       .replace(
         tagPattern,
-        function(whole,m1,m2) {
+        function(whole, m1, m2) {
           return replaceCustomTags.call(self, whole, m1, m2);
         }
-      )
+      );
   };
 
   // Export global variable
